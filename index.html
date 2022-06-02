@@ -5,6 +5,60 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 </head>
 <body>
-    <p> Hello </p>
+     <script>
+        // api url
+        const api_url = "https://data.gov.sg/api/action/datastore_search";
+        
+        // get table properities
+        var myTable = document.getElementById('data')
+
+        // Defining async function
+        async function getAPI(url) {
+            // Storing response
+            const response = await fetch(url);
+            
+            // Storing data in form of JSON
+            var data = await response.json();
+            tableData = data.items[0].readings
+            // Get the updated time stamp from the API
+            var updateDateTime = data.items[0].update_timestamp
+            // Convert string into Date 
+            updateDateTime = new Date(updateDateTime)
+            var options = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false};
+            // Get the h6 of updated time
+            var getTime = document.getElementById('updated_datetime')
+            getTime.innerHTML = 'Last updated at ' + updateDateTime.toLocaleDateString("en-US", options)
+
+            // Create the table headings
+            let tab = 
+                `<tr>
+                    <th>Metric</th>
+                    <th>West</th>
+                    <th>National</th>
+                    <th>East</th>
+                    <th>Central</th>
+                    <th>South</th>
+                    <th>North</th>
+             `
+            myTable.innerHTML = tab
+
+            // Create the table data
+            for (const [key, value] of Object.entries(tableData)) {
+                var tr = myTable.insertRow(-1)
+                var tabCell = tr.insertCell(-1)
+                tabCell.innerHTML = key
+                
+                Object.keys(value).forEach(function(heading) {
+                    var heading = heading
+                    var rowValue = value[heading]
+                    var tabCell = tr.insertCell(-1)
+                    tabCell.innerHTML = rowValue
+                })
+            }
+        }
+        
+        // Calling that async function
+        getAPI(api_url);
+    </script>
 </body>
 </html>
