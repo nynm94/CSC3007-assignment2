@@ -6,8 +6,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <script src="https://d3js.org/d3.v6.min.js"></script>
-    <style>
-    </style>
 </head>
 
 <body>
@@ -118,7 +116,9 @@
                 .style("stroke-width", 3);
         };
         var mousemove = function (d, i) {
-            Tooltip.html("Total Crimes: " + i.value)
+            console.log(d)
+            console.log(i)
+            Tooltip.html(i.data[0] + " : " +  i.value)
                 .style("left", d3.mouse(this)[0] + 70 + "px")
                 .style("top", d3.mouse(this)[1] + "px");
         };
@@ -141,7 +141,9 @@
 
             // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
             u
-                .join('path')
+                .enter()
+                .append("path")
+                .merge(u)
                 .transition()
                 .duration(1000)
                 .attrTween('d', function (d) {
@@ -159,6 +161,8 @@
                 .attr("stroke", "white")
                 .style("stroke-width", "2px")
                 .style("opacity", 1)
+
+            u
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave);
