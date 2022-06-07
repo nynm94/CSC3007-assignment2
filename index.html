@@ -1,19 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>CSC3007 Assignment 2</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+    </style>
 </head>
+
 <body>
-    <p>hello</p>
+    <label for="year">Sort By Year:</label>
+    <select name="year" id="year" onchange=update(eval(this.value))>
+        <option value="data_2011">2011</option>
+        <option value="data_2012">2012</option>
+        <option value="data_2013">2013</option>
+        <option value="data_2014">2014</option>
+        <option value="data_2015">2015</option>
+        <option value="data_2016">2016</option>
+        <option value="data_2017">2017</option>
+        <option value="data_2018">2018</option>
+        <option value="data_2019">2019</option>
+        <option value="data_2020">2020</option>
+    </select>
+    <br>
+    <label for="offence">Sort By Offence:</label>
+    <select name="offence" id="offence" onchange=update(eval(this.value))>
+        <option value="data_murder">Murder</option>
+        <option value="data_serioushurt">Serious Hurt</option>
+        <option value="data_rape">Rape</option>
+        <option value="data_outrageofmodesty">Outrage Of Modesty</option>
+        <option value="data_rioting">Rioting</option>
+        <option value="data_robbery">Robbery</option>
+        <option value="data_housebreaking">House Breaking</option>
+        <option value="data_theftofmotorvehicle">Theft Of Motor Vehicle</option>
+        <option value="data_snatchtheft">Snatch Theft</option>
+        <option value="data_cheatingrelatedoffences">Cheating Related Offences</option>
+    </select>
+
+    <!-- Graph -->
+    <div id="my_dataviz"></div>
+
     <script>
-        d3.csv("/data/cases-recorded-for-selected-major-offences.csv", function(data) {
-            for (var i = 0; i < data.length; i++) {
-                console.log(data[i].Name);
-                console.log(data[i].Age);
-            }
-        });
+        // Data sort by year
+        let data_2011 = []
+        let data_2012 = []
+        let data_2013 = []
+        let data_2014 = []
+        let data_2015 = []
+        let data_2016 = []
+        let data_2017 = []
+        let data_2018 = []
+        let data_2019 = []
+        let data_2020 = []
+
+        // Data sort by offences
+        let data_murder = []
+        let data_serioushurt = []
+        let data_rape = []
+        let data_outrageofmodesty = []
+        let data_rioting = []
+        let data_robbery = []
+        let data_housebreaking = []
+        let data_theftofmotorvehicle = []
+        let data_snatchtheft = []
+        let data_cheatingrelatedoffences = []
+
+        // Loading data
+        d3.csv("/data/cases-recorded-for-selected-major-offences.csv", function (data) {
+            dict = eval("data_" + data["year"])
+            dict[data["level_2"]] = data["value"]
+            dict2 = eval("data_" + data["level_2"].toLowerCase().replace(/ /g, ""))
+            dict2[data["year"]] = data["value"]
+        })
+
+        // set the dimensions and margins of the graph
+        const width = 450,
+            height = 450,
+            margin = 40;
+
+        // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+        const radius = Math.min(width, height) / 2 - margin;
+
+        // append the svg object to the div called 'my_dataviz'
+        const svg = d3.select("#my_dataviz")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`)
+
+        // set the color scale
+        const color = d3.scaleOrdinal()
+            .domain(["Murder", "Serious Hurt", "Rape", "Outrage of Modesty", "Rioting", "Robbery", "Housebreaking", "Theft Of Motor Vehicle", "Snatch Theft", "Cheating Related Offences"])
+            .range(d3.schemeDark2);
+
+        // create a tooltip
+        var Tooltip = d3
+            .select("#my_dataviz")
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("position", "absolute")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px");
+
+        // Three function that change the tooltip when user hover / move / leave a cell
+        var mouseover = function (d) {
+            Tooltip.style("opacity", 1);
+            d3.select(this)
+                .style("stroke", "red")
+                .style("opacity", 1)
+                .style("stroke-width", 3);
+        };
+        var mousemove = function (d, i) {
+            Tooltip.html("Total Crimes: " + i.value)
+                .style("left", d3.mouse(this)[0] + 70 + "px")
+                .style("top", d3.mouse(this)[1] + "px");
+        };
+        var mouseleave = function (d) {
+            Tooltip.style("opacity", 0);
+            d3.select(this).style("stroke", "none").style("opacity", 0.8);
+        };
+
+        // A function that create / update the plot for a given variable:
+        function update(data) {
+            // Compute the position of each group on the pie:
+            const pie = d3.pie()
+                .value(function (d) { return d[1]; })
+                .sort(function (a, b) { return d3.ascending(a.key, b.key); }) // This make sure that group order remains the same in the pie chart
+            const data_ready = pie(Object.entries(data))
+
+            // map to data
+            const u = svg.selectAll("path")
+                .data(data_ready)
+
+            // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+            u
+                .join('path')
+                .transition()
+                .duration(1000)
+                .attrTween('d', function (d) {
+                    var i = d3.interpolate(local.get(this), d);
+                    local.set(this, i(0));
+                    return function (t) {
+                        return arc(i(t));
+                    };
+                })
+                .attr('d', d3.arc()
+                    .innerRadius(0)
+                    .outerRadius(radius)
+                )
+                .attr('fill', function (d) { return (color(d.data[0])) })
+                .attr("stroke", "white")
+                .style("stroke-width", "2px")
+                .style("opacity", 1)
+                .on("mouseover", mouseover)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseleave);
+        }
+        // Initialize the plot with the first dataset
+        update(data_2011)
     </script>
 </body>
+
 </html>
