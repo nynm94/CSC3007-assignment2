@@ -8,8 +8,6 @@
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
-
-<body>
     <div>
         <h2 class="text-center">Major Offence Cases In Singapore</h2>
     </div>
@@ -47,6 +45,7 @@
 
     <br>
     <br>
+
     <!-- Graph -->
     <div id="my_dataviz"></div>
 
@@ -98,6 +97,7 @@
                         row2 = { 'year': element['year'], 'cases': element['value'] }
                         dict2.push(row2)
                     })
+                    window.addEventListener('load', update(data_2011))
                 })
                 .catch(error => console.log("Error"));
         }
@@ -220,8 +220,10 @@
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave)
+            u
+                .exit()
+                .remove()
         }
     </script>
-</body>
-
+    </body>
 </html>
