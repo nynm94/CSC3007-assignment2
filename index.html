@@ -29,7 +29,8 @@
                 <option value="data_2020">2020</option>
             </select>
             <label for="offence">Sort By Offence:</label>
-            <select class="form-select form-select-lg mb-3" name="offence" id="offence" onchange=update(eval(this.value))>
+            <select class="form-select form-select-lg mb-3" name="offence" id="offence"
+                onchange=update(eval(this.value))>
                 <option value="data_murder">Murder</option>
                 <option value="data_serioushurt">Serious Hurt</option>
                 <option value="data_rape">Rape</option>
@@ -75,15 +76,33 @@
         let data_snatchtheft = []
         let data_cheatingrelatedoffences = []
 
-        // Loading data
-        d3.csv("/data/cases-recorded-for-selected-major-offences.csv", function (data) {
-            dict = eval("data_" + data["year"])
-            row = { 'crime': data['level_2'], 'cases': data['value'] }
-            dict.push(row)
-            dict2 = eval("data_" + data["level_2"].toLowerCase().replace(/ /g, ""))
-            row2 = { 'year': data['year'], 'cases': data['value'] }
-            dict2.push(row2)
-        })
+        // Fetch and load data
+        function fetchData() {
+            fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf', { method: 'GET' })
+                .then(res => {
+                    if (res.ok) {
+                        console.log("Success")
+                        return res.json()
+                    }
+                    else {
+                        console.log("Not successful")
+                    }
+                })
+                .then(data => {
+                    var crime_data = data['result']['records']
+                    crime_data.forEach(element => {
+                        dict = eval("data_" + element["year"])
+                        row = { 'crime': element['level_2'], 'cases': element['value'] }
+                        dict.push(row)
+                        dict2 = eval("data_" + element["level_2"].toLowerCase().replace(/ /g, ""))
+                        row2 = { 'year': element['year'], 'cases': element['value'] }
+                        dict2.push(row2)
+                    })
+                })
+                .catch(error => console.log("Error"));
+        }
+        // Call the fetchData 
+        fetchData()
     </script>
 
     <!-- Create/Update Chart -->
@@ -184,7 +203,7 @@
                     .attr("width", x.bandwidth())
                     .attr("height", (d) => height - y(d.cases))
                     .attr("fill", "#FFBF00")
-                    
+
             } else {
                 u
                     .enter()
