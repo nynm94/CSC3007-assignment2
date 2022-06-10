@@ -8,222 +8,220 @@
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
-    <div>
-        <h2 class="text-center">Major Offence Cases In Singapore</h2>
-    </div>
-    <div>
-        <h4 class="text-center">
-            <label for="year">Sort By Year:</label>
-            <select class="form-select form-select-lg mb-3" name="year" id="year" onchange=update(eval(this.value))>
-                <option value="data_2011">2011</option>
-                <option value="data_2012">2012</option>
-                <option value="data_2013">2013</option>
-                <option value="data_2014">2014</option>
-                <option value="data_2015">2015</option>
-                <option value="data_2016">2016</option>
-                <option value="data_2017">2017</option>
-                <option value="data_2018">2018</option>
-                <option value="data_2019">2019</option>
-                <option value="data_2020">2020</option>
-            </select>
-            <label for="offence">Sort By Offence:</label>
-            <select class="form-select form-select-lg mb-3" name="offence" id="offence"
-                onchange=update(eval(this.value))>
-                <option value="data_murder">Murder</option>
-                <option value="data_serioushurt">Serious Hurt</option>
-                <option value="data_rape">Rape</option>
-                <option value="data_outrageofmodesty">Outrage Of Modesty</option>
-                <option value="data_rioting">Rioting</option>
-                <option value="data_robbery">Robbery</option>
-                <option value="data_housebreaking">House Breaking</option>
-                <option value="data_theftofmotorvehicle">Theft Of Motor Vehicle</option>
-                <option value="data_snatchtheft">Snatch Theft</option>
-                <option value="data_cheatingrelatedoffences">Cheating Related Offences</option>
-            </select>
-        </h4>
-    </div>
+<div>
+    <h2 class="text-center">Major Offence Cases In Singapore</h2>
+</div>
+<div>
+    <h4 class="text-center">
+        <label for="year">Sort By Year:</label>
+        <select class="form-select form-select-lg mb-3" name="year" id="year" onchange=update(eval(this.value))>
+            <option value="data_2011">2011</option>
+            <option value="data_2012">2012</option>
+            <option value="data_2013">2013</option>
+            <option value="data_2014">2014</option>
+            <option value="data_2015">2015</option>
+            <option value="data_2016">2016</option>
+            <option value="data_2017">2017</option>
+            <option value="data_2018">2018</option>
+            <option value="data_2019">2019</option>
+            <option value="data_2020">2020</option>
+        </select>
+        <label for="offence">Sort By Offence:</label>
+        <select class="form-select form-select-lg mb-3" name="offence" id="offence" onchange=update(eval(this.value))>
+            <option value="data_murder">Murder</option>
+            <option value="data_serioushurt">Serious Hurt</option>
+            <option value="data_rape">Rape</option>
+            <option value="data_outrageofmodesty">Outrage Of Modesty</option>
+            <option value="data_rioting">Rioting</option>
+            <option value="data_robbery">Robbery</option>
+            <option value="data_housebreaking">House Breaking</option>
+            <option value="data_theftofmotorvehicle">Theft Of Motor Vehicle</option>
+            <option value="data_snatchtheft">Snatch Theft</option>
+            <option value="data_cheatingrelatedoffences">Cheating Related Offences</option>
+        </select>
+    </h4>
+</div>
 
-    <br>
-    <br>
+<br>
+<br>
 
-    <!-- Graph -->
-    <div id="my_dataviz"></div>
+<!-- Graph -->
+<div id="my_dataviz"></div>
 
-    <!-- Loading of data-->
-    <script>
-        // Data sort by year
-        let data_2011 = []
-        let data_2012 = []
-        let data_2013 = []
-        let data_2014 = []
-        let data_2015 = []
-        let data_2016 = []
-        let data_2017 = []
-        let data_2018 = []
-        let data_2019 = []
-        let data_2020 = []
+<!-- Loading of data-->
+<script>
+    // Data sort by year
+    let data_2011 = []
+    let data_2012 = []
+    let data_2013 = []
+    let data_2014 = []
+    let data_2015 = []
+    let data_2016 = []
+    let data_2017 = []
+    let data_2018 = []
+    let data_2019 = []
+    let data_2020 = []
 
-        // Data sort by offences
-        let data_murder = []
-        let data_serioushurt = []
-        let data_rape = []
-        let data_outrageofmodesty = []
-        let data_rioting = []
-        let data_robbery = []
-        let data_housebreaking = []
-        let data_theftofmotorvehicle = []
-        let data_snatchtheft = []
-        let data_cheatingrelatedoffences = []
+    // Data sort by offences
+    let data_murder = []
+    let data_serioushurt = []
+    let data_rape = []
+    let data_outrageofmodesty = []
+    let data_rioting = []
+    let data_robbery = []
+    let data_housebreaking = []
+    let data_theftofmotorvehicle = []
+    let data_snatchtheft = []
+    let data_cheatingrelatedoffences = []
 
-        // Fetch and load data
-        function fetchData() {
-            fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf', { method: 'GET' })
-                .then(res => {
-                    if (res.ok) {
-                        console.log("Success")
-                        return res.json()
-                    }
-                    else {
-                        console.log("Not successful")
-                    }
-                })
-                .then(data => {
-                    var crime_data = data['result']['records']
-                    crime_data.forEach(element => {
-                        dict = eval("data_" + element["year"])
-                        row = { 'crime': element['level_2'], 'cases': element['value'] }
-                        dict.push(row)
-                        dict2 = eval("data_" + element["level_2"].toLowerCase().replace(/ /g, ""))
-                        row2 = { 'year': element['year'], 'cases': element['value'] }
-                        dict2.push(row2)
-                    })
-                    window.addEventListener('load', update(data_2011))
-                })
-                .catch(error => console.log("Error"));
-        }
-        // Call the fetchData 
-        fetchData()
-    </script>
-
-    <!-- Create/Update Chart -->
-    <script>
-        // set the dimensions and margins of the bar chart
-        var margin = { top: 30, right: 30, bottom: 70, left: 60 },
-            width = 1200 - margin.left - margin.right,
-            height = 400 - margin.top - margin.bottom;
-
-        // append the svg object to the body of the page
-        var svg = d3.select("#my_dataviz")
-            .append("svg")
-            .attr("viewBox", `0 0 1200 400`)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        // Initialize the X axis
-        var x = d3.scaleBand()
-            .domain([0, 20000])
-            .range([0, width])
-            .padding(0.2);
-        var xAxis = svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
-
-        // Initialize the Y axis
-        var y = d3.scaleLinear()
-            .domain([0, 20000])
-            .range([height, 0]);
-        var yAxis = svg.append("g")
-            .attr("class", "myYaxis")
-
-        // create a tooltip
-        var Tooltip = d3
-            .select("#my_dataviz")
-            .append("div")
-            .style("opacity", 0)
-            .attr("class", "tooltip")
-            .style("position", "absolute")
-            .style("background-color", "white")
-            .style("border", "solid")
-            .style("border-width", "2px")
-            .style("border-radius", "5px")
-            .style("padding", "5px");
-
-        // Three function that change the tooltip when user hover / move / leave a cell
-        var mouseover = function (d) {
-            Tooltip.style("opacity", 1);
-            d3.select(this)
-                .style("stroke", "red")
-                .style("opacity", 1)
-                .style("stroke-width", 3);
-        };
-
-        var mousemove = function (d, i) {
-            if (Object.keys(i)[0] == 'year') {
-                Tooltip.html("Year: " + i.year + "<br> Number of Cases: " + i.cases)
-                    .style("left", d3.pointer(this)[0] + 70 + "px")
-                    .style("top", d3.pointer(this)[1] + "px");
-            } else {
-                Tooltip.html("Type of Crime: " + i.crime + "<br>Number of Cases: " + i.cases)
-                    .style("left", d3.pointer(this)[0] + 70 + "px")
-                    .style("top", d3.pointer(this)[1] + "px");
-            }
-        };
-
-        var mouseleave = function (d) {
-            Tooltip.style("opacity", 0);
-            d3.select(this).style("stroke", "none").style("opacity", 0.8);
-        };
-
-        // A function that create / update the plot for a given variable:
-        function update(data) {
-            // Update the X axis
-            x.domain(data.map(function (d) {
-                if (Object.keys(d)[0] == 'year') {
-                    return d.year
-                } else {
-                    return d.crime
+    // Fetch and load data
+    function fetchData() {
+        fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf', { method: 'GET' })
+            .then(res => {
+                if (res.ok) {
+                    console.log("Success")
+                    return res.json()
                 }
-            }))
-            xAxis.call(d3.axisBottom(x))
+                else {
+                    console.log("Not successful")
+                }
+            })
+            .then(data => {
+                var crime_data = data['result']['records']
+                crime_data.forEach(element => {
+                    dict = eval("data_" + element["year"])
+                    row = { 'crime': element['level_2'], 'cases': element['value'] }
+                    dict.push(row)
+                    dict2 = eval("data_" + element["level_2"].toLowerCase().replace(/ /g, ""))
+                    row2 = { 'year': element['year'], 'cases': element['value'] }
+                    dict2.push(row2)
+                })
+                window.addEventListener('load', update(data_2011))
+            })
+            .catch(error => console.log("Error"));
+    }
+    // Call the fetchData 
+    fetchData()
+</script>
 
-            // Update the Y axis
-            y.domain([0, d3.max(data, function (d) { return d.cases })]);
-            yAxis.transition().duration(1000).call(d3.axisLeft(y));
+<!-- Create/Update Chart -->
+<script>
+    // set the dimensions and margins of the bar chart
+    var margin = { top: 30, right: 30, bottom: 70, left: 60 },
+        width = 1200 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
-            // map to data
-            const u = svg.selectAll("rect")
-                .data(data)
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("viewBox", `0 0 1200 400`)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            if (isNaN(x.domain()[0])) {
-                u
-                    .enter()
-                    .append("rect")
-                    .merge(u)
-                    .attr("x", (d) => x(d.crime)) // X axis (Type of Crimes)
-                    .attr("y", (d) => y(d.cases)) // Y axis (No. of Cases of Respective Crime)
-                    .attr("width", x.bandwidth())
-                    .attr("height", (d) => height - y(d.cases))
-                    .attr("fill", "#FFBF00")
+    // Initialize the X axis
+    var x = d3.scaleBand()
+        .domain([0, 20000])
+        .range([0, width])
+        .padding(0.2);
+    var xAxis = svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
 
+    // Initialize the Y axis
+    var y = d3.scaleLinear()
+        .domain([0, 20000])
+        .range([height, 0]);
+    var yAxis = svg.append("g")
+        .attr("class", "myYaxis")
+
+    // create a tooltip
+    var Tooltip = d3
+        .select("#my_dataviz")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "5px")
+        .style("padding", "5px");
+
+    // Three function that change the tooltip when user hover / move / leave a cell
+    var mouseover = function (d) {
+        Tooltip.style("opacity", 1);
+        d3.select(this)
+            .style("stroke", "red")
+            .style("opacity", 1)
+            .style("stroke-width", 3);
+    };
+
+    var mousemove = function (d, i) {
+        if (Object.keys(i)[0] == 'year') {
+            Tooltip.html("Year: " + i.year + "<br> Number of Cases: " + i.cases)
+                .style("left", d3.pointer(this)[0] + 70 + "px")
+                .style("top", d3.pointer(this)[1] + "px");
+        } else {
+            Tooltip.html("Type of Crime: " + i.crime + "<br>Number of Cases: " + i.cases)
+                .style("left", d3.pointer(this)[0] + 70 + "px")
+                .style("top", d3.pointer(this)[1] + "px");
+        }
+    };
+
+    var mouseleave = function (d) {
+        Tooltip.style("opacity", 0);
+        d3.select(this).style("stroke", "none").style("opacity", 0.8);
+    };
+
+    // A function that create / update the plot for a given variable:
+    function update(data) {
+        // Update the X axis
+        x.domain(data.map(function (d) {
+            if (Object.keys(d)[0] == 'year') {
+                return d.year
             } else {
-                u
-                    .enter()
-                    .append("rect")
-                    .merge(u)
-                    .attr("x", (d) => x(d.year)) // X axis (Year)
-                    .attr("y", (d) => y(d.cases)) // Y axis (No. of Cases of Respective Crime)
-                    .attr("width", x.bandwidth())
-                    .attr("height", (d) => height - y(d.cases))
-                    .attr("fill", "#FFBF00")
+                return d.crime
             }
+        }))
+        xAxis.call(d3.axisBottom(x))
 
+        // Update the Y axis
+        y.domain([0, d3.max(data, function (d) { return d.cases })]);
+        yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+        // map to data
+        const u = svg.selectAll("rect")
+            .data(data)
+
+        if (isNaN(x.domain()[0])) {
             u
+                .enter()
+                .append("rect")
+                .merge(u)
+                .attr("x", (d) => x(d.crime)) // X axis (Type of Crimes)
+                .attr("y", (d) => y(d.cases)) // Y axis (No. of Cases of Respective Crime)
+                .attr("width", x.bandwidth())
+                .attr("height", (d) => height - y(d.cases))
+                .attr("fill", "#FFBF00")
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave)
+
+        } else {
             u
-                .exit()
-                .remove()
+                .enter()
+                .append("rect")
+                .merge(u)
+                .attr("x", (d) => x(d.year)) // X axis (Year)
+                .attr("y", (d) => y(d.cases)) // Y axis (No. of Cases of Respective Crime)
+                .attr("width", x.bandwidth())
+                .attr("height", (d) => height - y(d.cases))
+                .attr("fill", "#FFBF00")
+                .on("mouseover", mouseover)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseleave)
         }
-    </script>
-    </body>
+    }
+</script>
+</body>
+
 </html>
